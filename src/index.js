@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
+import './index.scss';
+import 'bootstrap/dist/css/bootstrap.css';
+import 'react-image-gallery/styles/css/image-gallery.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
