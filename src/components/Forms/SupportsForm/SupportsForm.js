@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import ConfirmModal from "../Straws8Form/Straws8Form";
 
 class SupportsForm extends Component {
 
@@ -9,7 +10,9 @@ class SupportsForm extends Component {
         size: this.props.formData.size,
         pack: 'carton',
         amount: null,
-        price: null
+        price: null,
+        isShowBasketModal: false,
+        isShowOrderModal: false
     };
 
     keyPressHandling = event => {
@@ -27,8 +30,26 @@ class SupportsForm extends Component {
         this.setFormData(+event.currentTarget.value, this.state.pack);
     };
 
-    submitHandler = event => {
-        console.log(this.state);
+    submitHandler = () => {
+        this.setState(state => ({isShowBasketModal: !state.isShowBasketModal}));
+    };
+
+    addToBasket = (event) => {
+        if (event) {
+            const basketJSON = localStorage.getItem('basket');
+            if (!basketJSON) {
+                localStorage.setItem('basket', JSON.stringify([this.state]));
+            } else {
+                const basket = JSON.parse(basketJSON);
+                basket.push(this.state);
+                localStorage.setItem('basket', JSON.stringify(basket));
+            }
+        }
+        this.setState(state => ({isShowBasketModal: !state.isShowBasketModal}));
+    };
+
+    modalHandler = () => {
+        this.setState(state => ({isShowOrderModal: !state.isShowOrderModal}));
     };
 
     setFormData = (amount, pack) => {
@@ -51,6 +72,8 @@ class SupportsForm extends Component {
         } else {
             if (this.state.price !== null) {
                 this.setState({ amount: amount, price: null });
+            } else {
+                this.setState({ pack: pack });
             }
         }
     };
@@ -65,6 +88,24 @@ class SupportsForm extends Component {
                         <option value="box">Ящик - {this.props.formData.packs.box}</option>
                     </Form.Control>
                 </Form.Group>
+                {
+                    this.props.formData.boxPrice ?
+                        <React.Fragment>
+                            <div style={{display: 'flex', justifyContent: 'center'}}>
+                                Увага! Від одного ящика діють оптові ціни.
+                            </div>
+                            <div style={{fontWeight: '700'}}>
+                                <div>Роздрібна ціна за шт: {this.props.formData.cartonPrice} грн</div>
+                                <div>Оптова ціна за шт: {this.props.formData.boxPrice} грн</div>
+                            </div>
+                        </React.Fragment> : null
+                }
+                { this.props.formData.boxPrice ?
+                    null :
+                    <div style={{fontWeight: '700'}}>
+                        <div>Роздрібна ціна за шт: {this.props.formData.cartonPrice} грн</div>
+                    </div>
+                }
                 <Form.Group controlId="number">
                     <Form.Label>Кількість</Form.Label>
                     <Form.Control type="number" onKeyPress={this.keyPressHandling} onChange={this.amountChanged} />
@@ -72,9 +113,22 @@ class SupportsForm extends Component {
                 <div>
                     PRICE: {this.state.price}
                 </div>
-                <Button onClick={this.submitHandler} variant="primary" type="button">
-                    Submit
-                </Button>
+                <div style={{marginTop: '20px'}} className="form-btn-grp">
+                    <Button style={{backgroundColor: '#7aca56', border: '#7aca56'}} onClick={this.submitHandler} variant="primary" type="button">
+                        В корзину
+                    </Button>
+                    <Button style={{backgroundColor: 'black', border: 'black'}} onClick={this.modalHandler} variant="primary" type="button">
+                        Замовити
+                    </Button>
+                </div>
+                {this.state.isShowBasketModal ?
+                    <ConfirmModal header="Додати в корзину" click={this.addToBasket}>
+                        Ви дійсно хочете додати дане замовлення в корзину?
+                    </ConfirmModal> : null}
+                {this.state.isShowOrderModal ?
+                    <ConfirmModal header="Замовити" click={this.modalHandler}>
+                        Ви дійсно хочете здійснити замовлення?
+                    </ConfirmModal> : null}
             </Form>
         );
     }

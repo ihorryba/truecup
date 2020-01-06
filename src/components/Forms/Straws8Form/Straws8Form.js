@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import ConfirmModal from '../../Modals/ConfirmModal/ConfirmModal';
 
 class Straws8Form extends Component {
 
@@ -9,7 +10,9 @@ class Straws8Form extends Component {
         size: this.props.formData.size,
         pack: 'carton',
         amount: null,
-        price: null
+        price: null,
+        isShowBasketModal: false,
+        isShowOrderModal: false
     };
 
     keyPressHandling = event => {
@@ -20,34 +23,64 @@ class Straws8Form extends Component {
     };
 
     packChanged = event => {
-        this.setState({ pack: event.currentTarget.value });
+        this.setFormData(this.state.amount, event.currentTarget.value);
     };
 
     amountChanged = event => {
-        this.setState({ amount: +event.currentTarget.value });
+        this.setFormData(+event.currentTarget.value, this.state.pack);
     };
 
-    submitHandler = event => {
-        console.log(this.state);
+    submitHandler = () => {
+        this.setState(state => ({isShowBasketModal: !state.isShowBasketModal}));
     };
 
-    render() {
-        if (this.state.amount || this.state.amount === 0) {
-            if (this.state.amount * this.props.formData.packs[this.state.pack] >= this.props.formData.packs.box) {
-                const result = this.state.amount * this.props.formData.packs[this.state.pack] * this.props.formData.boxPrice;
-                if (result !== this.state.price)
-                    this.setState({ price: this.state.amount * this.props.formData.packs[this.state.pack] * this.props.formData.boxPrice });
+    addToBasket = (event) => {
+        if (event) {
+            const basketJSON = localStorage.getItem('basket');
+            if (!basketJSON) {
+                localStorage.setItem('basket', JSON.stringify([this.state]));
             } else {
-                const result = this.state.amount * this.props.formData.packs[this.state.pack] * this.props.formData.cartonPrice;
+                const basket = JSON.parse(basketJSON);
+                basket.push(this.state);
+                localStorage.setItem('basket', JSON.stringify(basket));
+            }
+        }
+        this.setState(state => ({isShowBasketModal: !state.isShowBasketModal}));
+    };
+
+    modalHandler = () => {
+        this.setState(state => ({isShowOrderModal: !state.isShowOrderModal}));
+    };
+
+    setFormData = (amount, pack) => {
+        if (amount || amount === 0) {
+            if ((amount * this.props.formData.packs[pack] >= this.props.formData.packs.box) && this.props.formData.boxPrice) {
+                const result = amount * this.props.formData.packs[pack] * this.props.formData.boxPrice;
                 if (result !== this.state.price)
-                    this.setState({ price: this.state.amount * this.props.formData.packs[this.state.pack] * this.props.formData.cartonPrice });
+                    this.setState({
+                        amount: amount,
+                        price: amount * this.props.formData.packs[pack] * this.props.formData.boxPrice,
+                        pack: pack
+                    });
+            } else {
+                const result = amount * this.props.formData.packs[pack] * this.props.formData.cartonPrice;
+                if (result !== this.state.price)
+                    this.setState({
+                        amount: amount,
+                        price: amount * this.props.formData.packs[pack] * this.props.formData.cartonPrice,
+                        pack: pack
+                    });
             }
         } else {
             if (this.state.price !== null) {
-                this.setState({ price: null });
+                this.setState({ amount: amount, price: null, pack: pack });
+            } else {
+                this.setState({ pack: pack });
             }
         }
+    };
 
+    render() {
         return (
             <Form>
                 <Form.Group controlId="pack">
@@ -57,6 +90,24 @@ class Straws8Form extends Component {
                         <option value="box">Ящик - {this.props.formData.packs.box}</option>
                     </Form.Control>
                 </Form.Group>
+                {
+                    this.props.formData.boxPrice ?
+                        <React.Fragment>
+                            <div style={{display: 'flex', justifyContent: 'center'}}>
+                                Увага! Від одного ящика діють оптові ціни.
+                            </div>
+                            <div style={{fontWeight: '700'}}>
+                                <div>Роздрібна ціна за шт: {this.props.formData.cartonPrice} грн</div>
+                                <div>Оптова ціна за шт: {this.props.formData.boxPrice} грн</div>
+                            </div>
+                        </React.Fragment> : null
+                }
+                { this.props.formData.boxPrice ?
+                    null :
+                    <div style={{fontWeight: '700'}}>
+                        <div>Роздрібна ціна за шт: {this.props.formData.cartonPrice} грн</div>
+                    </div>
+                }
                 <Form.Group controlId="number">
                     <Form.Label>Кількість</Form.Label>
                     <Form.Control type="number" onKeyPress={this.keyPressHandling} onChange={this.amountChanged} />
@@ -64,9 +115,22 @@ class Straws8Form extends Component {
                 <div>
                     PRICE: {this.state.price}
                 </div>
-                <Button onClick={this.submitHandler} variant="primary" type="button">
-                    Submit
-                </Button>
+                <div style={{marginTop: '20px'}} className="form-btn-grp">
+                    <Button style={{backgroundColor: '#7aca56', border: '#7aca56'}} onClick={this.submitHandler} variant="primary" type="button">
+                        В корзину
+                    </Button>
+                    <Button style={{backgroundColor: 'black', border: 'black'}} onClick={this.modalHandler} variant="primary" type="button">
+                        Замовити
+                    </Button>
+                </div>
+                {this.state.isShowBasketModal ?
+                    <ConfirmModal header="Додати в корзину" click={this.addToBasket}>
+                        Ви дійсно хочете додати дане замовлення в корзину?
+                    </ConfirmModal> : null}
+                {this.state.isShowOrderModal ?
+                    <ConfirmModal header="Замовити" click={this.modalHandler}>
+                        Ви дійсно хочете здійснити замовлення?
+                    </ConfirmModal> : null}
             </Form>
         );
     }

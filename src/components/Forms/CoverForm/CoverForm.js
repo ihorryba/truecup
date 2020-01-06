@@ -2,15 +2,19 @@ import React, { Component } from 'react';
 
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import ConfirmModal from '../../Modals/ConfirmModal/ConfirmModal';
 
 class CoverForm extends Component {
 
     state = {
         size: this.props.formData[0].size,
+        currFormData: this.props.formData[0],
         pack: 'carton',
         amount: null,
         price: null,
-        color: null
+        color: null,
+        isShowBasketModal: false,
+        isShowOrderModal: false
     };
 
     keyPressHandling = event => {
@@ -21,11 +25,12 @@ class CoverForm extends Component {
     };
 
     packChanged = event => {
-        this.setState({ pack: event.currentTarget.value });
+        this.setFormData(this.state.amount, event.currentTarget.value, this.state.size);
     };
 
     sizeChanged = event => {
         this.setState({ size: +event.currentTarget.value });
+        this.setFormData(this.state.amount, this.state.pack, +event.currentTarget.value);
     };
 
     colorChanged = event => {
@@ -33,33 +38,63 @@ class CoverForm extends Component {
     };
 
     amountChanged = event => {
-        this.setState({ amount: +event.currentTarget.value });
+        this.setFormData(+event.currentTarget.value, this.state.pack, this.state.size);
     };
 
-    submitHandler = event => {
-        console.log(this.state);
-    };
-
-    render() {
-
-        const currFormData = this.props.formData.find(item => item.size === this.state.size);
-
-        if (this.state.amount || this.state.amount === 0) {
-            if (this.state.amount * currFormData.packs[this.state.pack] >= currFormData.packs.box) {
-                const result = this.state.amount * currFormData.packs[this.state.pack] * currFormData.boxPrice;
+    setFormData = (amount, pack, size) => {
+        const currFormData = this.props.formData.find(item => item.size === Number(size));
+        if (amount || amount === 0) {
+            if ((amount * currFormData.packs[pack] >= currFormData.packs.box) && currFormData.boxPrice) {
+                const result = amount * currFormData.packs[pack] * currFormData.boxPrice;
                 if (result !== this.state.price)
-                    this.setState({ price: this.state.amount * currFormData.packs[this.state.pack] * currFormData.boxPrice });
+                    this.setState({
+                        amount: amount,
+                        price: amount * currFormData.packs[pack] * currFormData.boxPrice,
+                        pack: pack,
+                        currFormData: currFormData
+                    });
             } else {
-                const result = this.state.amount * currFormData.packs[this.state.pack] * currFormData.cartonPrice;
+                const result = amount * currFormData.packs[pack] * currFormData.cartonPrice;
                 if (result !== this.state.price)
-                    this.setState({ price: this.state.amount * currFormData.packs[this.state.pack] * currFormData.cartonPrice });
+                    this.setState({
+                        amount: amount,
+                        price: amount * currFormData.packs[pack] * currFormData.cartonPrice,
+                        pack: pack,
+                        currFormData: currFormData
+                    });
             }
         } else {
             if (this.state.price !== null) {
-                this.setState({ price: null });
+                this.setState({ amount: amount, price: null, pack: pack, currFormData: currFormData });
+            } else {
+                this.setState({ pack: pack, currFormData: currFormData });
             }
         }
+    };
 
+    submitHandler = () => {
+        this.setState(state => ({isShowBasketModal: !state.isShowBasketModal}));
+    };
+
+    addToBasket = (event) => {
+        if (event) {
+            const basketJSON = localStorage.getItem('basket');
+            if (!basketJSON) {
+                localStorage.setItem('basket', JSON.stringify([this.state]));
+            } else {
+                const basket = JSON.parse(basketJSON);
+                basket.push(this.state);
+                localStorage.setItem('basket', JSON.stringify(basket));
+            }
+        }
+        this.setState(state => ({isShowBasketModal: !state.isShowBasketModal}));
+    };
+
+    modalHandler = () => {
+        this.setState(state => ({isShowOrderModal: !state.isShowOrderModal}));
+    };
+
+    render() {
         return (
             <Form>
                 <Form.Group controlId="size">
@@ -68,17 +103,35 @@ class CoverForm extends Component {
                         {this.props.formData.map(item => <option key={item.size} value={item.size}>{item.size}</option>)}
                     </Form.Control>
                 </Form.Group>
+                {
+                    this.state.currFormData.boxPrice ?
+                        <React.Fragment>
+                            <div style={{display: 'flex', justifyContent: 'center'}}>
+                                Увага! Від одного ящика діють оптові ціни.
+                            </div>
+                            <div style={{fontWeight: '700'}}>
+                                <div>Роздрібна ціна за шт: {this.state.currFormData.cartonPrice} грн</div>
+                                <div>Оптова ціна за шт: {this.state.currFormData.boxPrice} грн</div>
+                            </div>
+                        </React.Fragment> : null
+                }
+                { this.state.currFormData.boxPrice ?
+                    null :
+                    <div style={{fontWeight: '700'}}>
+                        <div>Роздрібна ціна за шт: {this.state.currFormData.cartonPrice} грн</div>
+                    </div>
+                }
                 <Form.Group controlId="color">
                     <Form.Label>Упаковка</Form.Label>
                     <Form.Control onChange={this.packChanged} as="select">
-                        <option value="carton">Рукав - {currFormData.packs.carton}</option>
-                        <option value="box">Ящик - {currFormData.packs.box}</option>
+                        <option value="carton">Рукав - {this.state.currFormData.packs.carton}</option>
+                        <option value="box">Ящик - {this.state.currFormData.packs.box}</option>
                     </Form.Control>
                 </Form.Group>
                 <Form.Group controlId="pack">
                     <Form.Label>Колір</Form.Label>
                     <Form.Control onChange={this.colorChanged} as="select">
-                        {currFormData.colors.map(item => <option key={item} value={item}>{item}</option>)}
+                        {this.state.currFormData.colors.map(item => <option key={item} value={item}>{item}</option>)}
                     </Form.Control>
                 </Form.Group>
                 <Form.Group controlId="number">
@@ -86,11 +139,24 @@ class CoverForm extends Component {
                     <Form.Control type="number" onKeyPress={this.keyPressHandling} onChange={this.amountChanged} />
                 </Form.Group>
                 <div>
-                    PRICE: {this.state.price}
+                    Ціна: {this.state.price}
                 </div>
-                <Button onClick={this.submitHandler} variant="primary" type="button">
-                    Submit
-                </Button>
+                <div style={{marginTop: '20px'}} className="form-btn-grp">
+                    <Button style={{backgroundColor: '#7aca56', border: '#7aca56'}} onClick={this.submitHandler} variant="primary" type="button">
+                        В корзину
+                    </Button>
+                    <Button style={{backgroundColor: 'black', border: 'black'}} onClick={this.modalHandler} variant="primary" type="button">
+                        Замовити
+                    </Button>
+                </div>
+                {this.state.isShowBasketModal ?
+                    <ConfirmModal header="Додати в корзину" click={this.addToBasket}>
+                        Ви дійсно хочете додати дане замовлення в корзину?
+                    </ConfirmModal> : null}
+                {this.state.isShowOrderModal ?
+                    <ConfirmModal header="Замовити" click={this.modalHandler}>
+                        Ви дійсно хочете здійснити замовлення?
+                    </ConfirmModal> : null}
             </Form>
         );
     }

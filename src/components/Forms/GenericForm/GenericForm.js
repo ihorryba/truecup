@@ -8,11 +8,9 @@ class CupForm extends Component {
 
     state = {
         size: this.props.formData[0].size,
-        currFormData: this.props.formData[0],
         pack: 'carton',
         amount: null,
         price: null,
-        color: null,
         isShowBasketModal: false,
         isShowOrderModal: false
     };
@@ -25,13 +23,12 @@ class CupForm extends Component {
     };
 
     packChanged = event => {
-        this.setFormData(this.state.amount, event.currentTarget.value, this.state.size);
+        this.setState({ pack: event.currentTarget.value });
     };
 
     sizeChanged = event => {
         const value = this.props.formType === 'caps' ? +event.currentTarget.value : event.currentTarget.value;
         this.setState({ size: value });
-        this.setFormData(this.state.amount, this.state.pack, +event.currentTarget.value);
     };
 
     colorChanged = event => {
@@ -39,7 +36,7 @@ class CupForm extends Component {
     };
 
     amountChanged = event => {
-        this.setFormData(+event.currentTarget.value, this.state.pack, this.state.size);
+        this.setState({ amount: +event.currentTarget.value });
     };
 
     submitHandler = () => {
@@ -64,38 +61,24 @@ class CupForm extends Component {
         this.setState(state => ({isShowOrderModal: !state.isShowOrderModal}));
     };
 
-    setFormData = (amount, pack, size) => {
-        const currFormData = this.props.formData.find(item => item.size === Number(size));
-        if (amount || amount === 0) {
-            if ((amount * currFormData.packs[pack] >= currFormData.packs.box) && currFormData.boxPrice) {
-                const result = amount * currFormData.packs[pack] * currFormData.boxPrice;
+    render() {
+        const currFormData = this.props.formData.find(item => item.size === Number(this.state.size));
+        if (this.state.amount || this.state.amount === 0) {
+            if (this.state.amount * currFormData.packs[this.state.pack] >= currFormData.packs.box) {
+                const result = this.state.amount * currFormData.packs[this.state.pack] * currFormData.boxPrice;
                 if (result !== this.state.price)
-                    this.setState({
-                        amount: amount,
-                        price: amount * currFormData.packs[pack] * currFormData.boxPrice,
-                        pack: pack,
-                        currFormData: currFormData
-                    });
+                    this.setState({ price: this.state.amount * currFormData.packs[this.state.pack] * currFormData.boxPrice });
             } else {
-                const result = amount * currFormData.packs[pack] * currFormData.cartonPrice;
+                const result = this.state.amount * currFormData.packs[this.state.pack] * currFormData.cartonPrice;
                 if (result !== this.state.price)
-                    this.setState({
-                        amount: amount,
-                        price: amount * currFormData.packs[pack] * currFormData.cartonPrice,
-                        pack: pack,
-                        currFormData: currFormData
-                    });
+                    this.setState({ price: this.state.amount * currFormData.packs[this.state.pack] * currFormData.cartonPrice });
             }
         } else {
             if (this.state.price !== null) {
-                this.setState({ amount: amount, price: null, pack: pack, currFormData: currFormData });
-            } else {
-                this.setState({ pack: pack, currFormData: currFormData });
+                this.setState({ price: null });
             }
         }
-    };
 
-    render() {
         return (
             <React.Fragment>
                 <Form>
@@ -109,16 +92,16 @@ class CupForm extends Component {
                         Увага! Від одного ящика діють оптові ціни.
                     </div>
                     <div style={{fontWeight: '700'}}>
-                        <div>Роздрібна ціна за шт: {this.state.currFormData.cartonPrice} грн</div>
-                        <div>Оптова ціна за шт: {this.state.currFormData.boxPrice} грн</div>
+                        <div>Роздрібна ціна за шт: {currFormData.cartonPrice} грн</div>
+                        <div>Оптова ціна за шт: {currFormData.boxPrice} грн</div>
                     </div>
                     <Form.Group controlId="pack">
                         <Form.Label>Упаковка</Form.Label>
                         <Form.Control onChange={this.packChanged} as="select">
                             {
                                 <React.Fragment>
-                                    <option value="carton">Рукав - {this.state.currFormData.packs.carton}</option>
-                                    <option value="box">Ящик - {this.state.currFormData.packs.box}</option>
+                                    <option value="carton">Рукав - {currFormData.packs.carton}</option>
+                                    <option value="box">Ящик - {currFormData.packs.box}</option>
                                 </React.Fragment>
                             }
                         </Form.Control>

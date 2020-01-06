@@ -12,6 +12,7 @@ import StrawsForm from "../../components/Forms/Straws/StrawsForm";
 import WoodStickForm from "../../components/Forms/WoodStickForm/WoodStickForm";
 import CuffsForm from "../../components/Forms/CuffsForm/CuffsForm";
 import SupportsForm from "../../components/Forms/SupportsForm/SupportsForm";
+import GenericForm from "../../components/Forms/GenericForm/GenericForm";
 
 class Order extends Component {
     state = {
@@ -25,6 +26,7 @@ class Order extends Component {
 
     getNeededForm() {
         if (this.state.formType) {
+            // return <GenericForm {...this.state} />;
             switch (this.state.formType) {
                 case 'cups': return <CupForm {...this.state} />;
                 case 'packs': return <CupForm {...this.state} />;
@@ -45,7 +47,6 @@ class Order extends Component {
             .get()
             .then(data => {
                 const formDetail = data.docs.find(item => item.id.includes(this.props.match.params.id)).data();
-                console.log(formDetail);
                 this.setState({
                     formData: 'sizes' in formDetail ? formDetail.sizes : formDetail,
                     formType: formDetail.type
@@ -72,7 +73,7 @@ class Order extends Component {
 
         return (
             <div className="row">
-                <div style={{textAlign: 'center', fontSize: '20px', fontWeight: '600', marginBottom: '12px'}} className="col-12">Гофрований чорний</div>
+                <div style={{textAlign: 'center', fontSize: '20px', fontWeight: '600', marginBottom: '12px'}} className="col-12">{localStorage.getItem('title')}</div>
                 <div className="col-12 col-md-6">
                     <ImageGallery items={images} />
                 </div>
