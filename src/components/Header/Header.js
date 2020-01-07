@@ -2,6 +2,7 @@ import React from 'react';
 import classes from './Header.module.scss';
 
 import basketIcon from '../../assets/icons/basket.png';
+import BasketContext from '../../Contexts/BasketContext/BasketContext';
 
 import { NavLink } from 'react-router-dom';
 import { Link } from "react-router-dom";
@@ -25,7 +26,11 @@ const header = props => {
                 <Link to="/basket">
                     <img className={classes.ImgSize} src={basketIcon} alt="basket"/>
                 </Link>
-                <span className={classes.Label}>5</span>
+                <BasketContext.Consumer>
+                    {({amountOfOrders}) => (
+                        <span className={classes.Label}>{amountOfOrders}</span>
+                    )}
+                </BasketContext.Consumer>
             </div>
         </div>
     );

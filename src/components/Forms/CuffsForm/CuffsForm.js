@@ -2,12 +2,16 @@ import React, { Component } from 'react';
 
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import ConfirmModal from "../../Modals/ConfirmModal/ConfirmModal";
+import ConfirmModal from '../../Modals/ConfirmModal/ConfirmModal';
+import BasketContext from '../../../Contexts/BasketContext/BasketContext';
 
 class CuffsForm extends Component {
+    static contextType = BasketContext;
 
     state = {
+        id: +(new Date()),
         size: this.props.formData.size,
+        productData: this.props.productData,
         pack: 'carton',
         amount: null,
         price: null,
@@ -73,7 +77,8 @@ class CuffsForm extends Component {
                 localStorage.setItem('basket', JSON.stringify(basket));
             }
         }
-        this.setState(state => ({isShowBasketModal: !state.isShowBasketModal}));
+        this.context.getAmountOfOrders();
+        this.setState(state => ({isShowBasketModal: !state.isShowBasketModal, id: +(new Date())}));
     };
 
     modalHandler = () => {

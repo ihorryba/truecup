@@ -1,7 +1,8 @@
 import React from 'react';
 
 let defaultValue = {
-    amountOfOrders: false
+    amountOfOrders: false,
+    getAmountOfOrders: () => {}
 };
 
 const basketContext = React.createContext(defaultValue);

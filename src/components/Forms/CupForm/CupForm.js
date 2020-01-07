@@ -3,11 +3,15 @@ import React, { Component } from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import ConfirmModal from '../../../components/Modals/ConfirmModal/ConfirmModal';
+import BasketContext from '../../../Contexts/BasketContext/BasketContext';
 
 class CupForm extends Component {
+    static contextType = BasketContext;
 
     state = {
+        id: +(new Date()),
         size: this.props.formData[0].size,
+        productData: this.props.productData,
         currFormData: this.props.formData[0],
         pack: 'carton',
         amount: null,
@@ -31,7 +35,7 @@ class CupForm extends Component {
     sizeChanged = event => {
         const value = this.props.formType === 'caps' ? +event.currentTarget.value : event.currentTarget.value;
         this.setState({ size: value });
-        this.setFormData(this.state.amount, this.state.pack, +event.currentTarget.value);
+        this.setFormData(this.state.amount, this.state.pack, value);
     };
 
     colorChanged = event => {
@@ -57,7 +61,8 @@ class CupForm extends Component {
                 localStorage.setItem('basket', JSON.stringify(basket));
             }
         }
-        this.setState(state => ({isShowBasketModal: !state.isShowBasketModal}));
+        this.context.getAmountOfOrders();
+        this.setState(state => ({isShowBasketModal: !state.isShowBasketModal, id: +(new Date())}));
     };
 
     modalHandler = () => {
@@ -65,7 +70,7 @@ class CupForm extends Component {
     };
 
     setFormData = (amount, pack, size) => {
-        const currFormData = this.props.formData.find(item => item.size === Number(size));
+        const currFormData = this.props.formData.find(item => String(item.size) === String(size));
         if (amount || amount === 0) {
             if ((amount * currFormData.packs[pack] >= currFormData.packs.box) && currFormData.boxPrice) {
                 const result = amount * currFormData.packs[pack] * currFormData.boxPrice;

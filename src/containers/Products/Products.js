@@ -24,13 +24,13 @@ class Products extends Component {
                 .collection('products')
                 .where('categoryId', '==', this.props.match.params.id)
                 .get().then(data => {
-                return data.docs.map(item => {
-                    return {
-                        id: item.id,
-                        ...item.data()
-                    };
-                });
-            }),
+                    return data.docs.map(item => {
+                        return {
+                            id: item.id,
+                            ...item.data()
+                        };
+                    });
+                }),
             firebase.firestore()
                 .collection('types')
                 .get()

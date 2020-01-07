@@ -2,12 +2,16 @@ import React, { Component } from 'react';
 
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import ConfirmModal from "../Straws8Form/Straws8Form";
+import ConfirmModal from '../Straws8Form/Straws8Form';
+import BasketContext from '../../../Contexts/BasketContext/BasketContext';
 
 class SupportsForm extends Component {
+    static contextType = BasketContext;
 
     state = {
+        id: +(new Date()),
         size: this.props.formData.size,
+        productData: this.props.productData,
         pack: 'carton',
         amount: null,
         price: null,
@@ -45,7 +49,8 @@ class SupportsForm extends Component {
                 localStorage.setItem('basket', JSON.stringify(basket));
             }
         }
-        this.setState(state => ({isShowBasketModal: !state.isShowBasketModal}));
+        this.context.getAmountOfOrders();
+        this.setState(state => ({isShowBasketModal: !state.isShowBasketModal, id: +(new Date())}));
     };
 
     modalHandler = () => {
