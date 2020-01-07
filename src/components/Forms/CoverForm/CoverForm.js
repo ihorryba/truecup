@@ -13,6 +13,7 @@ class CoverForm extends Component {
         productData: this.props.productData,
         size: this.props.formData[0].size,
         currFormData: this.props.formData[0],
+        productId: this.props.productId,
         pack: 'carton',
         amount: null,
         price: null,

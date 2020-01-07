@@ -12,6 +12,7 @@ class CupForm extends Component {
         id: +(new Date()),
         size: this.props.formData[0].size,
         productData: this.props.productData,
+        productId: this.props.productId,
         pack: 'carton',
         amount: null,
         price: null,

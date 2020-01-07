@@ -26,14 +26,14 @@ class Order extends Component {
     getNeededForm() {
         if (this.state.formType) {
             switch (this.state.formType) {
-                case 'cups': return <CupForm {...this.state} />;
-                case 'packs': return <CupForm {...this.state} />;
-                case 'cover': return <CoverForm {...this.state} />;
-                case 'straws8': return <Straws8Form {...this.state} />;
-                case 'straws': return <StrawsForm {...this.state} />;
-                case 'woodStick': return <WoodStickForm {...this.state} />;
-                case 'cuffs': return <CuffsForm {...this.state} />;
-                case 'supports': return <SupportsForm {...this.state} />;
+                case 'cups': return <CupForm {...this.state} productId={this.props.match.params.id} />;
+                case 'packs': return <CupForm {...this.state} productId={this.props.match.params.id} />;
+                case 'cover': return <CoverForm {...this.state} productId={this.props.match.params.id} />;
+                case 'straws8': return <Straws8Form {...this.state} productId={this.props.match.params.id} />;
+                case 'straws': return <StrawsForm {...this.state} productId={this.props.match.params.id} />;
+                case 'woodStick': return <WoodStickForm {...this.state} productId={this.props.match.params.id} />;
+                case 'cuffs': return <CuffsForm {...this.state} productId={this.props.match.params.id} />;
+                case 'supports': return <SupportsForm {...this.state} productId={this.props.match.params.id} />;
             }
         }
         return null;
