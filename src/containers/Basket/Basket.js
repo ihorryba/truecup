@@ -64,7 +64,7 @@ class Basket extends Component {
                         {item.price}
                     </td>
                     <td style={{ textAlign: 'end' }} width="100">
-                        <Button style={{backgroundColor: '#7aca56', border: '#7aca56', marginBottom: '1px'}}>Змінити</Button>
+                        {/*<Button style={{backgroundColor: '#7aca56', border: '#7aca56', marginBottom: '1px'}}>Змінити</Button>*/}
                         <Button onClick={this.openRemoveModal(item)} variant="danger">Видалити</Button>
                     </td>
                 </tr>
@@ -88,7 +88,7 @@ class Basket extends Component {
                             Кількість
                         </th>
                         <th>
-                            Сума
+                            Сума (грн)
                         </th>
                         <th></th>
                     </tr>

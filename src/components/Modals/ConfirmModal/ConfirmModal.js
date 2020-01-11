@@ -13,7 +13,7 @@ class ConfirmModal extends Component {
         return (
             <div className={classes.Back}>
                 <div className={`${'row'} ${classes.Ctn}`}>
-                    <div className={`${'col-12 col-sm-6 col-lg-4'} ${classes.Modal}`}>
+                    <div className={`${'col-10 col-sm-6 col-lg-4'} ${classes.Modal}`}>
                         <div className={classes.Header}>
                             {this.props.header}
                         </div>
