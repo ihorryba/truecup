@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router';
 
 import classes from './Basket.module.scss';
 import Button from 'react-bootstrap/Button';
@@ -10,6 +11,7 @@ class Basket extends Component {
 
     state = {
         orders: [],
+        price: 0,
         isShowRemoveModal: false,
         selectedOrder: null
     };
@@ -17,7 +19,11 @@ class Basket extends Component {
     componentDidMount() {
         const basketJSON = localStorage.getItem('basket');
         if (basketJSON) {
-            this.setState({ orders: JSON.parse(basketJSON) });
+            const orders = JSON.parse(basketJSON);
+            const price = orders.reduce((prev, curr) => {
+                return prev + curr.price;
+            }, 0);
+            this.setState({ orders: orders, price: price });
         }
     }
 
@@ -40,7 +46,12 @@ class Basket extends Component {
             }
         }
         this.context.getAmountOfOrders();
-        this.setState(state => ({ orders: orders, isShowRemoveModal: !state.isShowRemoveModal }));
+        const price = orders.length > 0 ? orders.reduce((prev, curr) => prev + curr.price, 0) : 0;
+        this.setState(state => ({ orders: orders, price: price, isShowRemoveModal: !state.isShowRemoveModal }));
+    };
+
+    goToMainPage = () => {
+        this.props.history.push('/');
     };
 
     render() {
@@ -72,31 +83,48 @@ class Basket extends Component {
         }
         return (
             <React.Fragment>
-                <table style={{ 'width': '100%' }}>
-                    <thead>
-                    <tr>
-                        <th>
-                            Товар
-                        </th>
-                        <th>
-                            Розмір
-                        </th>
-                        <th>
-                            Колір
-                        </th>
-                        <th>
-                            Кількість
-                        </th>
-                        <th>
-                            Сума (грн)
-                        </th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {content}
-                    </tbody>
-                </table>
+                {
+                    this.state.orders.length ?
+                        <table style={{ 'width': '100%' }}>
+                            <thead>
+                            <tr>
+                                <th>
+                                    Товар
+                                </th>
+                                <th>
+                                    Розмір
+                                </th>
+                                <th>
+                                    Колір
+                                </th>
+                                <th>
+                                    Кількість
+                                </th>
+                                <th>
+                                    Сума (грн)
+                                </th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {content}
+                            <tr style={{ fontWeight: 'bold' }}>
+                                <td>Сума:</td><td></td><td></td><td></td>
+                                <td style={{ textAlign: 'start' }} >
+                                    {this.state.price}
+                                </td>
+                                <td></td>
+                            </tr>
+                            </tbody>
+                        </table> :
+                        <React.Fragment>
+                            <div style={{ textAlign: 'center', padding: '30px 0', fontSize: '20px', fontWeight: 'bold' }}>Кошик пустий. Зробіть замовлення.</div>
+                            <div style={{ textAlign: 'center' }}>
+                                <Button onClick={this.goToMainPage} variant="primary">Перейти до товарів</Button>
+                            </div>
+                        </React.Fragment>
+
+                }
                 {this.state.isShowRemoveModal ?
                     <ConfirmModal header="Видалити" click={this.removeOrder}>
                         Ви дійсно хочете видалити замовлення?

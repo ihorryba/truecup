@@ -119,7 +119,7 @@ class CuffsForm extends Component {
                     <Form.Control type="number" onKeyPress={this.keyPressHandling} onChange={this.amountChanged} />
                 </Form.Group>
                 <div>
-                    Ціна: {this.state.price}
+                    Сума: {this.state.price}
                 </div>
                 <div style={{marginTop: '20px'}} className="form-btn-grp">
                     <Button style={{backgroundColor: '#7aca56', border: '#7aca56'}} onClick={this.submitHandler} variant="primary" type="button">

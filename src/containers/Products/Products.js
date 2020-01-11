@@ -9,9 +9,23 @@ import classes from './Products.module.scss';
 
 class Products extends Component {
 
+    getHeader = () => {
+        switch (this.props.match.params.id) {
+            case 'cups':
+                return 'Стакани';
+            case 'packs':
+                return 'Пакети';
+            case 'accessories':
+                return 'Аксесуари';
+            default:
+                return 'Товар';
+        }
+    };
+
     state = {
         products: null,
-        types: null
+        types: null,
+        title: this.getHeader()
     };
 
     componentDidMount() {
@@ -79,7 +93,7 @@ class Products extends Component {
         }
         return (
             <div className={classes.Products}>
-                <SubHeader text="Товар" />
+                <SubHeader text={this.state.title} />
                 <div className={`${'container'} ${classes.CardCtn}`}>
                     {products}
                 </div>
