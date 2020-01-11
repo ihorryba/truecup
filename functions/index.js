@@ -19,7 +19,7 @@ exports.sendMail = functions.https.onRequest((req, res) => {
 
         const mailOptions = {
             from: 'TrueCup <truecupmail@gmail.com>',
-            to: 'rybaihor@gmai.com',
+            to: 'rybaihor@gmail.com',
             subject: 'I\'M A PICKLE!!!',
             html: `<p style="font-size: 16px;">Pickle Riiiiiiiiiiiiiiiick!!</p>
                 <br />
